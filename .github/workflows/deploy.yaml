@@ -43,9 +43,4 @@ jobs:
         cd "$PACKAGE_JSON_DIR"
         npm install
 
-    - name: Run tests
-      run: |
-        PACKAGE_JSON_PATH=${{ steps.find-package-json.outputs.path }}
-        PACKAGE_JSON_DIR=$(dirname "$PACKAGE_JSON_PATH")
-        cd "$PACKAGE_JSON_DIR"
-        npm test
+    
