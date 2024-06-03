@@ -21,9 +21,11 @@ jobs:
       with:
         node-version: '14'
 
-    - name: Install dependencies
+    - name: Install npm
       run: npm --version
+    - name: Install express
       run: npm install express
+    - name: Install init
       run: npm init -y
 
     - name: Build the project
