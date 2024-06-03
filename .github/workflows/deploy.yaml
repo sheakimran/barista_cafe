@@ -1,25 +1,32 @@
-name: Deploy to GitHub Pages
+name: CI
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: write
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: List directory structure
+      run: ls -R ${{ github.workspace }}
+
     - name: Verify package.json exists
       run: |
-        if [ ! -f "${{ github.workspace }}/barista_cafe/package.json" ]; then
-          echo "package.json not found in barista_cafe directory"
+        PACKAGE_JSON_PATH=$(find ${{ github.workspace }} -name "package.json")
+        if [ -z "$PACKAGE_JSON_PATH" ]; then
+          echo "package.json not found"
           exit 1
+        else
+          echo "package.json found at $PACKAGE_JSON_PATH"
         fi
 
     - name: Set up Node.js
@@ -27,13 +34,23 @@ jobs:
       with:
         node-version: '14'
 
-    - name: Install dependencies
-      run: npm install
+    - name: Run npm install
+      run: |
+        PACKAGE_JSON_PATH=$(find ${{ github.workspace }} -name "package.json")
+        PACKAGE_JSON_DIR=$(dirname "$PACKAGE_JSON_PATH")
+        cd "$PACKAGE_JSON_DIR"
+        npm install
 
-    - name: Build the project
-      run: npm run build
+    - name: Run tests
+      run: |
+        PACKAGE_JSON_PATH=$(find ${{ github.workspace }} -name "package.json")
+        PACKAGE_JSON_DIR=$(dirname "$PACKAGE_JSON_PATH")
+        cd "$PACKAGE_JSON_DIR"
+        npm test
+
+
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.0
       with:
-          branch: gh-pages
-          folder: build
+        branch: gh-pages
+        folder: build
